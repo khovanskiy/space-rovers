@@ -1,6 +1,4 @@
-﻿using RegistrySystem;
-
-namespace Game
+﻿namespace Game
 {
     public class GenerateWorldState : State
     {

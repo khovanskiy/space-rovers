@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml;
 using Astronomy;
+using Game.RegistrySystem.Objects;
 
 namespace Game.Astronomy.Objects
 {
@@ -56,7 +57,7 @@ namespace Game.Astronomy.Objects
             return "DATA\\Planets\\anim.png";
         }
 
-        private static void f(XmlNode xml, RegistrySystem.RegistryObject parent)
+        private static void f(XmlNode xml, RegistryObject parent)
         {
             foreach (XmlNode table in xml)
             {

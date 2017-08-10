@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Game.GCore;
 
-namespace RegistrySystem
+namespace Game.Registry
 {
     [Serializable()]
-    public abstract class RegistryObject : Game.GCore.EventDispatcher
+    public abstract class RegistryObject : EventDispatcher
     {
         public List<string> links = new List<string>();
         public List<RegistryObject> children = new List<RegistryObject>();

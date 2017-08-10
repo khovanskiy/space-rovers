@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Engine.RegistrySystem.Objects
+namespace Game.RegistrySystem.Objects
 {
     [Serializable()]
     public abstract class RegistryObject 

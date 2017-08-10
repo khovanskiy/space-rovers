@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace RegistrySystem
+﻿namespace Game.Registry
 {
-    public class Group : RegistrySystem.RegistryObject
+    public class Group : RegistryObject
     {
 
     }

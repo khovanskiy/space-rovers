@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 
-namespace RegistrySystem
+namespace Game.Registry
 {
     [Serializable()]
     public class Registry

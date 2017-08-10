@@ -1,7 +1,7 @@
 ﻿using System;
 using Engine.Astronomy.Objects;
-using Engine.RegistrySystem.Registry;
 using Game.Astronomy.Objects;
+using Game.RegistrySystem.Registry;
 
 namespace Game.Astronomy.Core
 {

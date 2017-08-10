@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Game.GCore;
-using RegistrySystem;
+using Game.Registry;
 
 namespace Game.Astronomy.Objects
 {

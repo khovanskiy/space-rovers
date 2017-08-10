@@ -143,9 +143,14 @@
     <Compile Include="PlayerSpaceView.cs"/>
     <Compile Include="RegistrySystem\Objects\RegistryObject.cs"/>
     <Compile Include="RegistrySystem\Registry\Registry.cs"/>
+    <Compile Include="Registry\Group.cs"/>
     <Compile Include="Registry\Registry.cs" />
     <Compile Include="Registry\RegistryObject.cs" />
     <Compile Include="Resource.cs"/>
+    <Compile Include="Ships\CannonInfoView.cs"/>
+    <Compile Include="Ships\EngineView.cs"/>
+    <Compile Include="Ships\HullView.cs"/>
+    <Compile Include="Ships\IStandard.cs"/>
     <Compile Include="Ships\Ship.cs" />
     <Compile Include="Ships\Cannon.cs" />
     <Compile Include="Ships\Component.cs" />
@@ -153,6 +158,7 @@
     <Compile Include="Ships\Hull.cs" />
     <Compile Include="Ships\ShipEvent.cs" />
     <Compile Include="Ships\ShipView.cs" />
+    <Compile Include="Ships\ShotView.cs"/>
     <Compile Include="SpaceSystemView.cs" />
     <Compile Include="StateFactory.cs" />
     <Compile Include="States\GameExitState.cs" />
@@ -163,6 +169,7 @@
     <Compile Include="States\GameOptionsState.cs" />
     <Compile Include="IState.cs" />
     <Compile Include="IStateContext.cs" />
+    <Compile Include="States\GameTestState.cs"/>
     <Compile Include="States\GenerateWorldState.cs" />
     <Compile Include="States\NewGameState.cs" />
     <Compile Include="Program.cs" />
@@ -170,6 +177,7 @@
     <Compile Include="StateContext.cs" />
     <Compile Include="StateEvent.cs" />
     <Compile Include="States\GamePauseState.cs" />
+    <Compile Include="States\PlayerEquipment.cs"/>
     <Compile Include="UITemplate.cs" />
     <Compile Include="UI\Button.cs" />
     <Compile Include="UI\Checkbox.cs" />
@@ -234,6 +242,13 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="UI\Button\menu\main\exit.png"/>
+    <Content Include="UI\Button\menu\main\load_game.png"/>
+    <Content Include="UI\Button\menu\main\main_menu_button.psd"/>
+    <Content Include="UI\Button\menu\main\new_game.png"/>
+    <Content Include="UI\Button\menu\main\settings.png"/>
+    <Content Include="UI\Checkbox\off.png"/>
+    <Content Include="UI\Checkbox\on.png"/>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -1,6 +1,6 @@
 ﻿namespace Game.Ships
 {
-    public abstract class Component : RegistrySystem.RegistryObject
+    public abstract class Component : RegistrySystem.RegistryObject, IStandard
     {
         public int level = 0;
         public int type = 0;

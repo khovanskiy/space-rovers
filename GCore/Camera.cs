@@ -4,17 +4,20 @@ namespace Game.GCore
 {
     public class Camera
     {
-        static Camera _instance;
-        public static float x;
-        public static float y;
-        public static float scaleX = 1;
-        public static float scaleY = 1;
-        public static float rotationZ;
+        private static Camera _instance;
+        private float _x;
+        private float _y;
+        private float _scaleX = 1;
+        private float _scaleY = 1;
+        private float _rotationZ;
         public static int width = 800;
         public static int height = 600;
         public const int sw = 1920;
         public const int sh = 1200;
         public static Matrix dpi;
+
+        private Matrix cameraCache = Matrix.Identity;
+        private bool shouldCameraUpdate = true;
 
         public Camera()
         {
@@ -22,14 +25,74 @@ namespace Game.GCore
                 GraphicCore.getInstance().form.Height / (float) sh, 1);
         }
 
-        public static Matrix matrix
+        public Matrix matrix
         {
             get
             {
-                return Matrix.Transformation2D(new Vector2(0, 0), 0,
-                    new Vector2(scaleX, scaleY), new Vector2(x, y), rotationZ,
-                    new Vector2(sw / 2 - x, sh / 2 - y));
+                if (shouldCameraUpdate)
+                {
+                    shouldCameraUpdate = false;
+                    GraphicCore.MCOUNT++;
+                    cameraCache = Matrix.Transformation2D(new Vector2(x, y), 0, new Vector2(scaleX, scaleY),
+                        new Vector2(x, y), rotationZ, new Vector2(sw / 2 - x, sh / 2 - y));
+                }
+                return cameraCache;
             }
+        }
+
+        public float x
+        {
+            get { return _x; }
+            set
+            {
+                _x = value;
+                spoilMe();
+            }
+        }
+
+        public float y
+        {
+            get { return _y; }
+            set
+            {
+                _y = value;
+                spoilMe();
+            }
+        }
+
+        public float rotationZ
+        {
+            get { return _rotationZ; }
+            set
+            {
+                _rotationZ = value;
+                spoilMe();
+            }
+        }
+
+        public float scaleX
+        {
+            get { return _scaleX; }
+            set
+            {
+                _scaleX = value;
+                spoilMe();
+            }
+        }
+
+        public float scaleY
+        {
+            get { return _scaleY; }
+            set
+            {
+                _scaleY = value;
+                spoilMe();
+            }
+        }
+
+        public void spoilMe()
+        {
+            shouldCameraUpdate = true;
         }
 
         public static Camera getInstance()
@@ -41,7 +104,7 @@ namespace Game.GCore
             return _instance;
         }
 
-        public static void clear()
+        public void clear()
         {
             x = 0;
             y = 0;

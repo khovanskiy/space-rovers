@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace Game.AI
 {
@@ -6,22 +9,22 @@ namespace Game.AI
     {
         protected List<Behavior> children = new List<Behavior>();
         private bool _isChanged = false;
-
         public void addChild(Behavior child)
         {
             children.Add(child);
             _isChanged = true;
         }
-
         public void removeChild(Behavior child)
         {
             children.Remove(child);
             _isChanged = true;
         }
-
         protected bool isChildrenUpdated
         {
-            get { return _isChanged; }
+            get
+            {
+                return _isChanged;
+            }
         }
     }
 }

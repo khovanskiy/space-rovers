@@ -21,7 +21,6 @@ namespace Game
             wf.generate();
 
             Player player = new Player();
-            player.ship = new Ships.Ship();
             RegistrySystem.Registry.getInstance().addElement(player, "player");
 
             dispatchEvent(new StateEvent(this, StateEvent.CHANGE_STATE, "gameplay"));
@@ -31,6 +30,7 @@ namespace Game
         }
         override public void release()
         {
+            keeper.clearAll();
             ui.clear();
         }
     }

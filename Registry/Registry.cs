@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Collections;
 
 namespace RegistrySystem
 {
     [Serializable()]
-    public class Registry 
+    public class Registry
     {
         private static Registry _instance;
         private static int maxUnprotectedID = 20000;
         private const int IdsAllocation = 10000;
         private Stack<int> freeIDs;
         public Hashtable data;
+
         private Registry()
         {
             this.data = new Hashtable();
@@ -25,6 +23,7 @@ namespace RegistrySystem
             }
             // Заполнение стека свободными незащищёнными идентификаторами            
         }
+
         public static Registry getInstance()
         {
             if (_instance == null)
@@ -33,6 +32,7 @@ namespace RegistrySystem
             }
             return _instance;
         }
+
         /// <summary>
         /// Возвращает элемент по ID
         /// </summary>
@@ -42,10 +42,11 @@ namespace RegistrySystem
         {
             if (this.data.Contains(id))
             {
-                return (RegistryObject)data[id];
+                return (RegistryObject) data[id];
             }
             return null;
         }
+
         public void clear()
         {
             data.Clear();
@@ -55,7 +56,8 @@ namespace RegistrySystem
                 freeIDs.Push(i);
             }
         }
-        public Object GetRawElement(string Id)
+
+        public Object getRawElement(string Id)
         {
             if (this.data.Contains(Id))
             {
@@ -63,6 +65,7 @@ namespace RegistrySystem
             }
             return null;
         }
+
         /// <summary>
         /// Возвращает незанятый ID
         /// </summary>
@@ -87,7 +90,7 @@ namespace RegistrySystem
                 id = getNextId();
             }
             element.my_id = id;
-            Console.WriteLine("Add to registry id="+id+" ");
+            Console.WriteLine("Add to registry id=" + id + " object " + element.GetType());
             if (!this.data.Contains(id))
             {
                 this.data.Add(id, element);

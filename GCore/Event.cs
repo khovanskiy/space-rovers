@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Game.GCore
 {
     public class Event
     {
-        public static readonly String COMPLETE = "complete";
-        public static readonly String ENTER_FRAME = "enterFrame";
-        public static readonly String CHANGE = "change";
-        public static readonly String ADDED_TO_STAGE = "addedToStage";
-        public static readonly String REMOVED_FROM_STAGE = "removedFromStage";
+        public const String COMPLETE = "complete";
+        public const String ENTER_FRAME = "enterFrame";
+        public const String CHANGE = "change";
+        public const String ADDED_TO_STAGE = "addedToStage";
+        public const String REMOVED_FROM_STAGE = "removedFromStage";
 
         private EventDispatcher _target;
         public String type;
@@ -21,16 +18,11 @@ namespace Game.GCore
             this._target = target;
             this.type = type;
         }
+
         public EventDispatcher target
         {
-            get
-            {
-                return _target;
-            }
-            set
-            {
-                _target = value;
-            }
+            get { return _target; }
+            set { _target = value; }
         }
     }
 }

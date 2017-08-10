@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
 using Game.GCore;
 
 namespace Game
@@ -11,14 +16,13 @@ namespace Game
         public static Camera camera;
         public static Mouse mouse;
         public static Keyboard keyboard;
-
+        public static Random random;
         private StateContext controller;
-
         //private static System.Object lockThis = new System.Object();
-        public static bool DEBUG = true;
-
+        //public static bool DEBUG = true;
         public Game()
         {
+            random = new Random();
             core = GraphicCore.getInstance();
             mouse = Mouse.getInstance();
             keyboard = Keyboard.getInstance();
@@ -27,7 +31,8 @@ namespace Game
             stage = Stage.getInstance();
             interfaceView = Interface.getInstance();
             controller = new StateContext();
-            //core.form.Text = "Angels' Hunter"; // Не делать имя: координаты мыши сломаются из-за высоты рамки!!!
+            //core.form.Text = "Angels' Hunter"; // �� ������ ���: ���������� ���� ��������� ��-�� ������ �����!!!
         }
     }
 }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          

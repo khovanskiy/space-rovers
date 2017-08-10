@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Collections;
 using Game.GCore;
 
 namespace Game
@@ -7,17 +11,15 @@ namespace Game
     public class StateContext
     {
         private List<State> _states;
-
         public StateContext()
         {
             _states = new List<State>(10);
-            turnOn("null");
+            turnOn("null", null);
             Game.core.addEventListener(Event.ENTER_FRAME, onRender);
         }
-
         private void onRender(Event e)
         {
-            for (int i = 0; i < _states.Count; i++)
+            for (int i=0;i<_states.Count;i++)
             {
                 if (_states[i] != null)
                 {
@@ -28,13 +30,13 @@ namespace Game
                 }
             }
         }
-
-        private void turnOn(String name)
+        private void turnOn(String name, Hashtable table)
         {
-            State s = StateFactory.create(name);
-            s.addEventListener(StateEvent.CHANGE_STATE, handler);
-            s.addEventListener(StateEvent.TURN_ON, handler);
-            s.addEventListener(StateEvent.TURN_OFF, handler);
+            State s=StateFactory.create(name);
+            s.args = table;
+            s.addEventListener(StateEvent.CHANGE_STATE,handler);
+            s.addEventListener(StateEvent.TURN_ON,handler);
+            s.addEventListener(StateEvent.TURN_OFF,handler);
             if (_states.Count > 0)
             {
                 _states[_states.Count - 1].defocus();
@@ -43,24 +45,22 @@ namespace Game
             s.init();
             s.focus();
         }
-
         private void turnOff()
         {
             if (_states.Count > 1)
             {
-                State last = _states[_states.Count - 1];
+                State last=_states[_states.Count - 1];
                 last.removeAll();
                 last.defocus();
                 last.release();
                 _states.RemoveAt(_states.Count - 1);
-                last = _states[_states.Count - 1];
+                last=_states[_states.Count - 1];
                 last.focus();
             }
         }
-
-        private void changeState(String name)
+        private void changeState(String name, Hashtable table)
         {
-            for (int i = 0; i < _states.Count; i++)
+            for (int i=0;i<_states.Count;i++)
             {
                 _states[i].removeAll();
                 _states[i].defocus();
@@ -68,45 +68,26 @@ namespace Game
             }
             _states.Clear();
             GC.Collect();
-            turnOn(name);
+            turnOn(name, table);
         }
-
         private void handler(Event e)
         {
-            Console.WriteLine("Handle " + e.type);
-            StateEvent ev = (StateEvent) e;
-            Console.WriteLine("Next " + ev.next);
+            StateEvent ev=(StateEvent)e;
             switch (ev.type)
             {
                 case StateEvent.TURN_ON:
                 {
-                    turnOn(ev.next);
-                }
-                    break;
+                    turnOn(ev.next, ev.args);
+                }break;
                 case StateEvent.TURN_OFF:
                 {
                     turnOff();
-                }
-                    break;
+                }break;
                 case StateEvent.CHANGE_STATE:
                 {
-                    changeState(ev.next);
-                }
-                    break;
+                    changeState(ev.next, ev.args);
+                }break;
             }
         }
-
-        /*private void setState(State state)
-        {
-            state.addEventListener(StateEvent.CHANGE_STATE, changeState);
-            state.addEventListener(StateEvent.TURN_ON,
-            if (_state != null)
-            {
-                _state.release();
-                _state.removeAll();
-            }
-            _state = state;
-            _state.init();
-        }*/
     }
 }

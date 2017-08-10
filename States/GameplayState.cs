@@ -1,91 +1,111 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Game.GCore;
 using Astronomy;
-using System.Threading;
-
 using RegistrySystem;
+using System.Collections;
 
 namespace Game
 {
     public class GameplayState : State
     {
-        // Bitmap m;
         PlanetarySystemView current_ps;
-        Boolean t = true;
-        ShipView sv;
-        List<Player> enemies = new List<Player>();
         TextField console = new TextField("");
         GCore.Timer timer;
         bool game_run = false;
-        public GameplayState()
-        {
-        }
+        bool linkCameraToPlayer = true;
+        private List<AIController> con = new List<AIController>();
+        private AIController player;
+        SpaceObject universe;
+
         override public void init()
         {
+            universe = (SpaceObject) Registry.getInstance().getElement("universe");
             timer = new GCore.Timer();
             timer.interval = 3000;
             timer.stop();
-            
+
             game_run = false;
 
             keeper.add(Game.interfaceView, console);
             console.text = "init";
-            SpaceObject ss = (SpaceObject)Registry.getInstance().getElement("s0000001");
+
+            PlanetarySystem ss = (PlanetarySystem) Registry.getInstance().getElement("s0000001");
             current_ps = new PlanetarySystemView(ss);
+
             keeper.add(Game.stage, current_ps);
-            Bitmap b = Resource.getBitmap(ss.src);
-            keeper.add(Game.background, b);
+            ss.nextTick(0.0001f);
+            Bitmap bg = new Bitmap();
+            bg.load("DATA\\Backgrounds\\1.jpg");
+            keeper.add(Game.background, bg);
 
-            Camera.scaleX = Camera.scaleY = 1f;
+            Game.camera.scaleX = Game.camera.scaleY = 1f;
 
-            Player player = (Player)Registry.getInstance().getElement("player");
-            sv = new ShipView(player.ship);
-            sv.id = "player";
-            keeper.add(current_ps, sv);
-            Random rand = new Random();
-            for (int i = 0; i < 5; i++)
+            Player mplayer = (Player) Registry.getInstance().getElement("player");
+            mplayer.ship.setHull(Economy.hulls[0]);
+            mplayer.ship.setEngine(Economy.engines[0]);
+            player = new AIController(mplayer);
+            PlayerSpaceView view = new PlayerSpaceView(mplayer, current_ps);
+            view.rotationZ = (float) Math.PI / 2;
+
+            for (int i = 0; i < 200; i++)
             {
-                Player ai = new Player();
-                ShipView ship_view = new ShipView(ai.ship);
-                keeper.add(ship_view, MouseEvent.CLICK, onClickByShip);
-                keeper.add(current_ps, ship_view);
-                ai.ship.x = rand.Next(-100, 100);
-                ai.ship.y = rand.Next(-100, 100);
-                ai.ship.update();
-                enemies.Add(ai);
+                Player r = createRandomPlayer();
+                AIController aic = new AIController(r);
+                PlayerSpaceView view2 = new PlayerSpaceView(r, current_ps);
+                keeper.add(view2, MouseEvent.CLICK, clickAtShip);
+                con.Add(aic);
+                GameWorld.players.Add(r);
             }
 
+            keeper.add(Game.mouse, MouseEvent.CLICK, onClick);
+            keeper.add(Game.mouse, MouseEvent.MOUSE_WHEEL, onWheel);
+            keeper.add(Game.mouse, MouseEvent.MOUSE_MOVE, onMove);
+            keeper.add(Game.keyboard, KeyboardEvent.KEY_UP, onKeyUp);
+            keeper.add(timer, TimerEvent.TIMER, onTimer);
         }
+
+        private void clickAtShip(Event e)
+        {
+            var table = new Hashtable();
+            table["player"] = ((PlayerSpaceView) e.target).player;
+            dispatchEvent(new StateEvent(this, StateEvent.TURN_ON, "equipment", table));
+        }
+
+        private Player createRandomPlayer()
+        {
+            Player player = new Player();
+            int id_hull = Game.random.Next(0, Economy.hulls.Count);
+            player.id_frac = id_hull;
+            player.ship.setHull((Ships.Hull) Economy.hulls[id_hull].likeIt());
+            player.ship.setEngine((Ships.Engine) Economy.engines[Game.random.Next(0, Economy.engines.Count)].likeIt());
+            for (int j = 0; j < player.ship.getHull().number_of_cannons + 1; j++)
+            {
+                player.ship.addComponent((Ships.Cannon) Economy.cannons[Game.random.Next(0, Economy.cannons.Count)]
+                    .likeIt());
+            }
+            return player;
+        }
+
         private void onTimer(Event e)
         {
             game_run = false;
             timer.stop();
         }
-        private void onClickByShip(Event e)
-        {
-            MouseEvent ev = (MouseEvent)e;
-            Bitmap f = Resource.getBitmap("DATA\\Other\\dot.png");
-            Point g = current_ps.localToGlobal(new Point(ev.localX, ev.localY));
-            f.x = g.x;
-            f.y = g.y;
-            keeper.add(current_ps, f);
-        }
+
         public override void focus()
         {
             setRendering(true);
-            keeper.add(sv, MouseEvent.CLICK, onClick);
-            keeper.add(Game.mouse, MouseEvent.MOUSE_WHEEL, onWheel);
-            keeper.add(Game.keyboard, KeyboardEvent.KEY_UP, onKeyUp);
-            keeper.add(timer, TimerEvent.TIMER, onTimer);
+            keeper.resumeListeners();
         }
+
+        private void onMove(Event e)
+        {
+        }
+
         private void onKeyUp(Event e)
         {
-            KeyboardEvent evt = (KeyboardEvent)e;
+            KeyboardEvent evt = (KeyboardEvent) e;
             if (evt.keyCode == Keyboard.ESCAPE)
             {
                 dispatchEvent(new StateEvent(this, StateEvent.TURN_ON, "pause"));
@@ -94,62 +114,98 @@ namespace Game
             {
                 dispatchEvent(new StateEvent(this, StateEvent.CHANGE_STATE, "generate"));
             }
+            if (evt.keyCode == Keyboard.C)
+            {
+                linkCameraToPlayer = true;
+            }
             if (evt.keyCode == Keyboard.SPACE)
             {
                 game_run = true;
-                //timer.start();
                 makeGlobalStep();
-                console.text = "Space button " + enemies[0].target.x+" "+enemies[0].target.y;
+                timer.start();
             }
         }
+
         private void makeGlobalStep()
         {
-            for (int i = 0; i < enemies.Count; i++)
+            for (int i = 0; i < con.Count; i++)
             {
-                enemies[i].nextStep();
+                con[i].nextStep(GameWorld.players);
             }
         }
+
         private void onWheel(Event e)
         {
-            console.text = "wheel";
-            MouseEvent evt = (MouseEvent)e;
+            MouseEvent evt = (MouseEvent) e;
             float k = 0.5f;
-            if (evt.delta > 0 && Math.Max(Camera.scaleX, Camera.scaleY) < 50)
+            if (evt.delta > 0 && Math.Max(Game.camera.scaleX, Game.camera.scaleY) < 50)
             {
-                Camera.scaleX += k;
-                Camera.scaleY += k;
+                Game.camera.scaleX += k;
+                Game.camera.scaleY += k;
             }
-            else if (evt.delta < 0 && Math.Min(Camera.scaleX, Camera.scaleY) > 0.5)
+            else if (evt.delta < 0 && Math.Min(Game.camera.scaleX, Game.camera.scaleY) > 0.5)
             {
-                Camera.scaleX -= k;
-                Camera.scaleY -= k;
+                Game.camera.scaleX -= k;
+                Game.camera.scaleY -= k;
             }
         }
+
         private void onClick(Event e)
         {
-            MouseEvent evt = (MouseEvent)e;
-            Player player = (Player)Registry.getInstance().getElement("player");
-            Point g = current_ps.localToGlobal(new Point(evt.localX, evt.localY));
-            player.target.x = g.x;
-            player.target.y = g.y;
-        }
-        override public void render()
-        {
-            if (game_run)
+            if (!game_run)
             {
-                SpaceObject v = (SpaceObject)Registry.getInstance().getElement("universe");
-                v.nextTick(0.0001f);
-                for (int i = 0; i < enemies.Count; i++)
-                {
-                    enemies[i].nextTick();
-                }
+                MouseEvent evt = (MouseEvent) e;
+                Player player = (Player) Registry.getInstance().getElement("player");
+                Point g = current_ps.localToGlobal(new Point(evt.localX, evt.localY));
+                player.destination.x = g.x;
+                player.destination.y = g.y;
             }
         }
+
+        override public void render()
+        {
+            console.text = GraphicCore.TOTAL_COUNT + "";
+            if (game_run)
+            {
+                universe.nextTick(0.0001f);
+
+                for (int i = 0; i < con.Count; i++)
+                {
+                    con[i].nextTick(0.0001f);
+                    //con[i].move();
+                }
+
+                //player.nextTick(0.0001f);
+            }
+            float speed = 0.1f;
+            if (Mouse.x <= Camera.width * 0.1f)
+            {
+                Game.camera.x -= speed;
+                linkCameraToPlayer = false;
+            }
+            if (Mouse.x >= Camera.width * 0.9f)
+            {
+                Game.camera.x += speed;
+                linkCameraToPlayer = false;
+            }
+            if (Mouse.y <= Camera.height * 0.1f)
+            {
+                Game.camera.y -= speed;
+                linkCameraToPlayer = false;
+            }
+            if (Mouse.y >= Camera.height * 0.9f)
+            {
+                Game.camera.y += speed;
+                linkCameraToPlayer = false;
+            }
+        }
+
         public override void defocus()
         {
-            keeper.clearListeners();
+            keeper.pauseListeners();
             setRendering(false);
         }
+
         override public void release()
         {
             keeper.clearAll();
@@ -157,7 +213,7 @@ namespace Game
             Game.background.clear();
             Game.interfaceView.clear();
             Registry.getInstance().clear();
-            Camera.clear();
+            Game.camera.clear();
             GC.Collect();
         }
     }

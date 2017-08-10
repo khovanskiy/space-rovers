@@ -1,17 +1,20 @@
-﻿using Game.GCore;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using Game.GCore;
 
 namespace Game
 {
     public class SpaceSystemView : Sprite
     {
         private Astronomy.SpaceObject _model;
-
         public SpaceSystemView(Astronomy.SpaceObject model)
         {
             _model = model;
             model.addEventListener(Event.CHANGE, onNextTick);
         }
-
         public void onNextTick(Event e)
         {
             //Console.WriteLine(_model.spaceobject_name + " CHANGE " + _model.local_angle);

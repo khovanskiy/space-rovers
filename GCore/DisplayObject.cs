@@ -14,9 +14,8 @@ namespace Game.GCore
         protected float _alpha = 1f;
         protected float _width = 0f;
         protected float _height = 0f;
-        protected float _tx;
-        protected float _ty;
-
+        public Point axisPoint = new Point(0, 0);
+        public Point rotationPoint = new Point(0, 0);
         protected bool _dvisible = true;
         protected float _dalpha = 1f;
         protected Matrix _dmatrix = Matrix.Identity;
@@ -25,6 +24,15 @@ namespace Game.GCore
         protected bool _isDisplayed;
         public bool ratio = true;
         protected RenderType _rendertype;
+
+        protected Matrix lmatrix = Matrix.Identity;
+        protected bool shouldLocalUpdate = true;
+
+        protected RectangleF boundsCache;
+        protected bool shouldBoundsUpdate = true;
+
+        protected Matrix gmatrix = Matrix.Identity;
+        protected bool shouldGlobalUpdate = true;
 
         public DisplayObjectContainer parent;
 
@@ -50,7 +58,7 @@ namespace Game.GCore
         /// <returns></returns>
         public Point globalToLocal(Point pt)
         {
-            Matrix m = Camera.matrix * matrix; //Порядок важен! (см. свойства матриц)
+            Matrix m = getInvertRenderMatrix(); //Порядок важен! (см. свойства матриц)
             float lx = pt.x;
             float ly = pt.y;
             float gx = lx * m.M11 + ly * m.M21 + m.M41;
@@ -65,7 +73,8 @@ namespace Game.GCore
         /// <returns></returns>
         public Point localToGlobal(Point pt)
         {
-            Matrix m = getGlobalMatrix(); //this.matrix * Camera.matrix;//Порядок важен! (см. свойства матриц)
+            Matrix
+                m = getRenderMatrix(); //this.matrix * Camera.matrix * Camera.dpi;//Порядок важен! (см. свойства матриц)
             m.Invert();
             float lx = pt.x;
             float ly = pt.y;
@@ -108,7 +117,7 @@ namespace Game.GCore
         /// <returns></returns>
         public bool hitTestPoint(float x, float y)
         {
-            RectangleF r = getBounds();
+            RectangleF r = getRenderBounds();
             return (r.Top <= y && y <= r.Bottom && r.Left <= x && x <= r.Right);
         }
 
@@ -119,7 +128,7 @@ namespace Game.GCore
         {
             get
             {
-                var res = getGlobalMatrix();
+                var res = getRenderMatrix();
                 return _height * Math.Abs(res.M12) + _width * Math.Abs(res.M11);
             }
             set
@@ -139,7 +148,7 @@ namespace Game.GCore
         {
             get
             {
-                var res = getGlobalMatrix();
+                var res = getRenderMatrix();
                 return _width * Math.Abs(res.M12) + _height * Math.Abs(res.M11);
             }
             set
@@ -152,10 +161,21 @@ namespace Game.GCore
             }
         }
 
+        public void setRSPointToCenter()
+        {
+            setRSPoint(_width / 2, _height / 2);
+        }
+
+        public void setRSPoint(float x, float y)
+        {
+            rotationPoint.x = x;
+            rotationPoint.y = y;
+        }
+
         public void setAxis(float tx, float ty)
         {
-            _tx = tx;
-            _ty = ty;
+            axisPoint.x = tx;
+            axisPoint.y = ty;
         }
 
         public void moveAxisToCenter()
@@ -163,26 +183,57 @@ namespace Game.GCore
             setAxis(_width / 2, _height / 2);
         }
 
+        public Matrix getLocalMatrix()
+        {
+            if (shouldLocalUpdate)
+            {
+                GraphicCore.MCOUNT++;
+                lmatrix = Matrix.Transformation2D(new Vector2(rotationPoint.x, rotationPoint.y), 0,
+                    new Vector2(_scaleX, _scaleY), new Vector2(rotationPoint.y, rotationPoint.y), _rotationZ,
+                    new Vector2(_x - rotationPoint.x, _y - rotationPoint.y));
+                shouldLocalUpdate = false;
+            }
+            return lmatrix;
+        }
+
         /// <summary>
         /// Возвращает итоговую матрицу для вывода объекта на экран
         /// </summary>
         /// <returns></returns>
-        public Matrix getGlobalMatrix()
+        public Matrix getRenderMatrix()
         {
             if (_rendertype == RenderType.STAGE)
             {
-                return matrix * Camera.matrix * Camera.dpi;
+                return globalMatrix * Game.camera.matrix * Camera.dpi;
             }
-            return matrix * Camera.dpi;
+            return globalMatrix * Camera.dpi;
+        }
+
+        public Matrix getInvertRenderMatrix()
+        {
+            if (_rendertype == RenderType.STAGE)
+            {
+                return Camera.dpi * Game.camera.matrix * globalMatrix;
+            }
+            return Camera.dpi * globalMatrix;
         }
 
         /// <summary>
         /// Возвращает рамку отображения для данного объекта
         /// </summary>
         /// <returns></returns>
-        public RectangleF getBounds()
+        virtual public RectangleF getRenderBounds()
         {
-            Matrix p = getGlobalMatrix();
+            return getBounds(getRenderMatrix());
+        }
+
+        public RectangleF getLocalBounds()
+        {
+            return getBounds(getLocalMatrix());
+        }
+
+        private RectangleF getBounds(Matrix p)
+        {
             float nx = 0;
             float ny = 0;
             float x1 = float.MaxValue;
@@ -226,13 +277,23 @@ namespace Game.GCore
             }
         }
 
+        virtual public float alpha
+        {
+            get { return _alpha * _dalpha; }
+            set
+            {
+                _alpha = value < 0.0f ? 0.0f : (value > 1.0f ? 1.0f : value);
+                update();
+            }
+        }
+
         public float x
         {
             get { return _x; }
             set
             {
                 _x = value;
-                update();
+                spoilMe();
             }
         }
 
@@ -242,7 +303,7 @@ namespace Game.GCore
             set
             {
                 _y = value;
-                update();
+                spoilMe();
             }
         }
 
@@ -252,7 +313,7 @@ namespace Game.GCore
             set
             {
                 _rotationZ = value;
-                update();
+                spoilMe();
             }
         }
 
@@ -267,7 +328,7 @@ namespace Game.GCore
             set
             {
                 _scaleX = value;
-                update();
+                spoilMe();
             }
         }
 
@@ -277,29 +338,27 @@ namespace Game.GCore
             set
             {
                 _scaleY = value;
-                update();
-            }
-        }
-
-        virtual public float alpha
-        {
-            get { return _alpha * _dalpha; }
-            set
-            {
-                _alpha = value;
-                update();
+                spoilMe();
             }
         }
 
         /// <summary>
         /// Возвращает матрицу перехода для локальной системы координат
         /// </summary>
-        public Matrix matrix
+        public Matrix globalMatrix
         {
             get
             {
-                return Matrix.Transformation2D(new Vector2(_tx, _ty), 0, new Vector2(_scaleX, _scaleY),
-                           new Vector2(_tx, _ty), _rotationZ, new Vector2(_x - _tx, _y - _ty)) * _dmatrix;
+                if (parent != null)
+                {
+                    if (shouldGlobalUpdate || shouldLocalUpdate)
+                    {
+                        shouldGlobalUpdate = false;
+                        gmatrix = getLocalMatrix() * parent.getLocalMatrix();
+                    }
+                    return gmatrix;
+                }
+                return getLocalMatrix();
             }
         }
 
@@ -311,12 +370,38 @@ namespace Game.GCore
             _update();
         }
 
+        public void spoilUp()
+        {
+            DisplayObject current = parent;
+            while (current != null)
+            {
+                current.shouldBoundsUpdate = true;
+                current = current.parent;
+            }
+        }
+
+        virtual public void spoilDown()
+        {
+            shouldGlobalUpdate = true;
+            shouldBoundsUpdate = true;
+        }
+
+        virtual public void spoilMe()
+        {
+            shouldLocalUpdate = true;
+            spoilUp();
+        }
+
         protected void _update()
         {
             if (parent != null)
             {
+                _dvisible = parent.visible;
+                _dalpha = parent.alpha;
+                _rendertype = parent.getRenderType();
                 if (!isDisplayed && parent.isDisplayed)
                 {
+                    _isDisplayed = true;
                     dispatchEvent(new Event(this, Event.ADDED_TO_STAGE));
                 }
                 else if (isDisplayed && !parent.isDisplayed)
@@ -324,11 +409,6 @@ namespace Game.GCore
                     _isDisplayed = false;
                     dispatchEvent(new Event(this, Event.REMOVED_FROM_STAGE));
                 }
-                _isDisplayed = parent.isDisplayed;
-                _dvisible = parent.visible;
-                _dalpha = parent.alpha;
-                _dmatrix = parent.matrix;
-                _rendertype = parent.getRenderType();
             }
             else
             {

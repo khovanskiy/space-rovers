@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace Game
 {
@@ -7,47 +10,54 @@ namespace Game
         private StateFactory()
         {
         }
-
         public static State create(String name)
         {
             switch (name)
             {
                 case "null":
-                {
-                    return new GameNullState();
-                }
+                    {
+                        return new GameNullState();
+                    }
                 case "intro":
-                {
-                    return new GameIntroState();
-                }
+                    {
+                        return new GameIntroState();
+                    }
                 case "menu":
-                {
-                    return new GameMenuState();
-                }
+                    {
+                        return new GameMenuState();
+                    }
+                case "equipment":
+                    {
+                        return new PlayerEquipment();
+                    }
                 case "options":
-                {
-                    return new GameOptionsState();
-                }
+                    {
+                        return new GameOptionsState();
+                    }
                 case "new_game":
-                {
-                    return new NewGameState();
-                }
+                    {
+                        return new NewGameState();
+                    }
                 case "generate":
-                {
-                    return new GenerateWorldState();
-                }
+                    {
+                        return new GenerateWorldState();
+                    }
+                case "test":
+                    {
+                        return new GameTestState();
+                    }
                 case "gameplay":
-                {
-                    return new GameplayState();
-                }
+                    {
+                        return new GameplayState();
+                    }
                 case "pause":
-                {
-                    return new GamePauseState();
-                }
+                    {
+                        return new GamePauseState();
+                    }
                 case "exit":
-                {
-                    return new GameExitState();
-                }
+                    {
+                        return new GameExitState();
+                    }
             }
             throw new Exception("error");
         }

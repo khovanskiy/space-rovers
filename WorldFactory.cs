@@ -1,4 +1,9 @@
-﻿using System.Xml;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using System.Xml;
 using Astronomy;
 
 namespace Game
@@ -6,12 +11,10 @@ namespace Game
     public class WorldFactory
     {
         XmlDocument xml;
-
         public WorldFactory(XmlDocument xml)
         {
             this.xml = xml;
         }
-
         public void generate()
         {
             foreach (XmlNode table in xml.DocumentElement.ChildNodes)
@@ -19,10 +22,13 @@ namespace Game
                 switch (table.Name)
                 {
                     case "space":
-                    {
-                        SpaceObject space = SpaceFactory.create(GCore.Resource.getXml(table.Attributes["src"].Value));
-                    }
-                        break;
+                        {
+                            SpaceFactory.generate(GCore.Resource.getXml(table.Attributes["src"].Value));
+                        }break;
+                    case "components":
+                        {
+                            ComponentsFactory.generate(GCore.Resource.getXml(table.Attributes["src"].Value));
+                        }break;
                 }
             }
         }

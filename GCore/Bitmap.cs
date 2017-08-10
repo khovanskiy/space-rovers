@@ -13,6 +13,33 @@ namespace Game.GCore
 {
     public class Bitmap : DisplayObject, IDisposable, ISource
     {
+        private class Loader : EventDispatcher, Runnable
+        {
+            public String path = "";
+            private SharpDX.Direct2D1.Bitmap data;
+            private Object lockObject;
+
+            public Loader(String path)
+            {
+                this.path = path;
+                lockObject = new Object();
+            }
+
+            public void run()
+            {
+                lock (lockObject)
+                {
+                    data = getSource(path);
+                }
+                dispatchEvent(new Event(this, Event.COMPLETE));
+            }
+
+            public SharpDX.Direct2D1.Bitmap getData()
+            {
+                return data;
+            }
+        }
+
         private SharpDX.Direct2D1.Bitmap source;
         public bool self_control = true;
 
@@ -25,8 +52,28 @@ namespace Game.GCore
         {
             if (self_control)
             {
-                source.Dispose();
+                if (source != null)
+                {
+                    source.Dispose();
+                }
             }
+        }
+
+        public void loadAsync(String path)
+        {
+            Loader loader = new Loader(path);
+            loader.addEventListener(Event.COMPLETE, onAsyncLoaded);
+            ThreadManager.addTask(loader);
+        }
+
+        public void onAsyncLoaded(Event e)
+        {
+            Loader loader = (Loader) e.target;
+            source = loader.getData();
+            _width = source.PixelSize.Width;
+            _height = source.PixelSize.Height;
+            _isLoaded = true;
+            dispatchEvent(new Event(this, Event.COMPLETE));
         }
 
         public void load(String path)
@@ -39,19 +86,23 @@ namespace Game.GCore
             dispatchEvent(new Event(this, Event.COMPLETE));
         }
 
-        /*public void loadFromResource(System.Drawing.Bitmap bitmap)
+        public static SharpDX.Direct2D1.Bitmap getSource(String path)
         {
-            var sourceArea = new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height);
-            var bitmapProperties = new BitmapProperties(new SharpDX.Direct2D1.PixelFormat(SharpDX.DXGI.Format.B8G8R8A8_UNorm, SharpDX.Direct2D1.AlphaMode.Premultiplied));
-            var size = new System.Drawing.Size(bitmap.Width, bitmap.Height);
+            using (var bitmap = (System.Drawing.Bitmap) Image.FromFile(path))
+            {
+                var sourceArea = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+                var bitmapProperties =
+                    new BitmapProperties(new PixelFormat(Format.B8G8R8A8_UNorm,
+                        AlphaMode.Premultiplied));
+                var size = new Size(bitmap.Width, bitmap.Height);
 
                 // Transform pixels from BGRA to RGBA
-            int stride = bitmap.Width * sizeof(int);
-            using (var tempStream = new DataStream(bitmap.Height * stride, true, true))
-            {
+                int stride = bitmap.Width * sizeof(int);
+                using (var tempStream = new DataStream(bitmap.Height * stride, true, true))
+                {
                     // Lock System.Drawing.Bitmap
-                    var bitmapData = bitmap.LockBits(sourceArea, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
-
+                    var bitmapData = bitmap.LockBits(sourceArea, ImageLockMode.ReadOnly,
+                        System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
                     // Convert all pixels 
                     for (int y = 0; y < bitmap.Height; y++)
                     {
@@ -66,24 +117,21 @@ namespace Game.GCore
                             int rgba = R | (G << 8) | (B << 16) | (A << 24);
                             tempStream.Write(rgba);
                         }
-
                     }
                     bitmap.UnlockBits(bitmapData);
-                    _width = bitmap.Width;
-                    _height = bitmap.Height;
                     tempStream.Position = 0;
                     GraphicCore core = GraphicCore.getInstance();
-                    source = new SharpDX.Direct2D1.Bitmap(core.render2d, size, tempStream, stride, bitmapProperties);
-
+                    return new SharpDX.Direct2D1.Bitmap(core.render2d, size, tempStream, stride, bitmapProperties);
+                }
             }
-            _isLoaded = true;
-            dispatchEvent(new Event(this, Event.COMPLETE));
-        }*/
+        }
+
         public void loadFromFile(string file)
         {
             if (!File.Exists(file))
             {
-                throw new Exception("Не найден файл");
+                Console.WriteLine("Не найден файл " + file);
+                throw new Exception("Не найден файл " + file);
             }
             using (var bitmap = (System.Drawing.Bitmap) Image.FromFile(file))
             {

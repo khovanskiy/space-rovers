@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
 using Game.GCore;
 
 namespace Game
@@ -6,15 +10,12 @@ namespace Game
     public class PlanetView : Bitmap
     {
         private Astronomy.SpaceObject _model;
-
         public PlanetView(Astronomy.SpaceObject model)
         {
-            Console.WriteLine("PLANET VIEW " + model.spaceobject_name);
             _model = model;
             model.addEventListener(Event.CHANGE, onNextTick);
-            this.moveAxisToCenter();
+            this.setRSPointToCenter();
         }
-
         public void onNextTick(Event e)
         {
             this.x = _model.local_x;

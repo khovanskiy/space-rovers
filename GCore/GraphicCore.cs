@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using AlphaMode = SharpDX.Direct2D1.AlphaMode;
 using Device1 = SharpDX.Direct3D10.Device1;
 using DriverType = SharpDX.Direct3D10.DriverType;
-using Factory = SharpDX.DXGI.Factory;
 
 namespace Game.GCore
 {
@@ -26,13 +25,16 @@ namespace Game.GCore
         public readonly static int MAX_DEPTH = 20;
         private Device1 device;
         public SwapChain swapChain;
-        private Factory factoryDX;
+        private SharpDX.DXGI.Factory factoryDX;
         private SharpDX.Direct2D1.Factory factory2d;
         private SharpDX.DirectWrite.Factory factoryText;
         private SolidColorBrush brush;
         static GraphicCore _instance = null;
         private bool _isRunning = false;
         public readonly int frame_rate = 30;
+        public static int MCOUNT = 0;
+        public static int TOTAL_COUNT = 0;
+        public static bool DEBUG = false;
 
         private GraphicCore()
         {
@@ -46,8 +48,8 @@ namespace Game.GCore
             {
                 BufferCount = 1,
                 ModeDescription =
-                    new ModeDescription(form.Width, form.Height, new Rational(30, 1), Format.R8G8B8A8_UNorm),
-                IsWindowed = false,
+                    new ModeDescription(form.Width, form.Height, new Rational(frame_rate, 1), Format.R8G8B8A8_UNorm),
+                IsWindowed = true,
                 OutputHandle = form.Handle,
                 SampleDescription = new SampleDescription(1, 0),
                 SwapEffect = SwapEffect.Discard,
@@ -63,7 +65,7 @@ namespace Game.GCore
             factoryText = new SharpDX.DirectWrite.Factory();
 
             // Ignore all windows events
-            factoryDX = swapChain.GetParent<Factory>();
+            factoryDX = swapChain.GetParent<SharpDX.DXGI.Factory>();
             //factoryDX.MakeWindowAssociation(form.Handle, WindowAssociationFlags.IgnoreAll);
 
             Texture2D backBuffer = Texture2D.FromSwapChain<Texture2D>(swapChain, 0);
@@ -95,54 +97,69 @@ namespace Game.GCore
             for (int i = 0; i < list.Count; i++)
             {
                 DisplayObject d = list[i];
-                if (d is ISource)
+                if (d.visible)
                 {
-                    if (d.isLoaded)
+                    if (d is ISource)
                     {
-                        SharpDX.Direct2D1.Bitmap b = ((ISource) d).getSource();
-                        float alpha = d.alpha;
-                        bool needRender = true;
-                        RectangleF rf = d.getBounds();
-                        needRender = inView(rf);
-                        if (needRender)
+                        if (d.isLoaded)
                         {
-                            if (Game.DEBUG)
+                            SharpDX.Direct2D1.Bitmap b = ((ISource) d).getSource();
+                            float alpha = d.alpha;
+                            bool needRender = true;
+                            RectangleF rf = d.getRenderBounds();
+                            needRender = inView(rf);
+                            if (needRender)
                             {
-                                this.render2d.Transform = SharpDX.Matrix.Identity;
-                                brush.Color = Color.GreenYellow;
-                                this.render2d.DrawRectangle(rf, brush);
+                                this.render2d.Transform = d.getRenderMatrix();
+                                this.render2d.DrawBitmap(b, alpha, BitmapInterpolationMode.NearestNeighbor);
+                                if (DEBUG)
+                                {
+                                    this.render2d.Transform = SharpDX.Matrix.Identity;
+                                    brush.Color = Color.GreenYellow;
+                                    this.render2d.DrawRectangle(rf, brush);
+
+                                    brush.Color = Color.Yellow;
+                                    Point p = d.globalToLocal(d.rotationPoint);
+                                    Ellipse c = new Ellipse(new DrawingPointF(p.x, p.y), 5, 5);
+                                    this.render2d.DrawEllipse(c, brush);
+                                }
                             }
-                            this.render2d.Transform = d.getGlobalMatrix();
-                            this.render2d.DrawBitmap(b, alpha, BitmapInterpolationMode.NearestNeighbor);
                         }
                     }
-                }
-                else if (d is TextField)
-                {
-                    GCore.TextField tf = (GCore.TextField) d;
-
-                    if (Game.DEBUG)
+                    else if (d is TextField)
                     {
-                        this.render2d.Transform = SharpDX.Matrix.Identity;
-                        brush.Color = Color.Aquamarine;
-                        this.render2d.DrawRectangle(d.getBounds(), brush);
-                    }
+                        GCore.TextField tf = (GCore.TextField) d;
 
-                    this.render2d.Transform = d.getGlobalMatrix();
-                    var format = new SharpDX.DirectWrite.TextFormat(factoryText, "Arial", tf.size);
-                    brush.Color = new Color4(tf.color);
-                    this.render2d.DrawText(tf.text, format, new RectangleF(0, 0, tf.size * tf.text.Length, 0), brush);
-                    format.Dispose();
-                }
-                else if (d is DisplayObjectContainer)
-                {
-                    if (Game.DEBUG)
-                    {
-                        this.render2d.Transform = SharpDX.Matrix.Identity;
-                        brush.Color = Color.Red;
-                        this.render2d.DrawRectangle(d.getBounds(), brush);
+                        if (DEBUG)
+                        {
+                            this.render2d.Transform = SharpDX.Matrix.Identity;
+                            brush.Color = Color.Aquamarine;
+                            this.render2d.DrawRectangle(d.getRenderBounds(), brush);
+                        }
+
+                        this.render2d.Transform = d.getRenderMatrix();
+                        var format = new SharpDX.DirectWrite.TextFormat(factoryText, "Arial", tf.size);
+                        brush.Color = new Color4(tf.color);
+                        this.render2d.DrawText(tf.text, format, new RectangleF(0, 0, tf.size * tf.text.Length, 0),
+                            brush);
+                        format.Dispose();
                     }
-                    this.render((DisplayObjectContainer) d, type, k + 1);
+                    else if (d is DisplayObjectContainer)
+                    {
+                        this.render((DisplayObjectContainer) d, type, k + 1);
+                        if (DEBUG)
+                        {
+                            this.render2d.Transform = SharpDX.Matrix.Identity;
+                            brush.Color = Color.Red;
+                            this.render2d.DrawRectangle(d.getRenderBounds(), brush);
+
+                            brush.Color = Color.IndianRed;
+                            //Point p = d.globalToLocal(d.rotationPoint);
+                            Point p = new Point(d.x, d.y);
+                            Ellipse c = new Ellipse(new DrawingPointF(p.x, p.y), 5, 5);
+                            this.render2d.DrawEllipse(c, brush);
+                        }
+                    }
                 }
             }
         }

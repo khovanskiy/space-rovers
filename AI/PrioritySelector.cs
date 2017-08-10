@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace Game.AI
 {
@@ -12,14 +15,13 @@ namespace Game.AI
                 {
                     return 1;
                 }
-                if (x.priority > y.priority)
+                else if (x.priority > y.priority)
                 {
                     return -1;
                 }
                 return 0;
             }
         }
-
         protected override int execute()
         {
             if (isChildrenUpdated)

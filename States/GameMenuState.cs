@@ -1,15 +1,12 @@
-﻿using Game.GCore;
+﻿using System.Windows.Forms;
+using Game.GCore;
 
-namespace Game
+namespace Game.States
 {
     public class GameMenuState : State
     {
         UITemplate ui;
         TextField tf = new TextField("");
-
-        public GameMenuState()
-        {
-        }
 
         override public void init()
         {
@@ -25,7 +22,7 @@ namespace Game
         private void onMove(Event e)
         {
             MouseEvent ev = (MouseEvent) e;
-            tf.text = "Move " + System.Windows.Forms.Cursor.Position.X + " " + System.Windows.Forms.Cursor.Position.Y;
+            tf.text = "Move " + Cursor.Position.X + " " + Cursor.Position.Y;
         }
 
         private void onClick(Event e)
@@ -50,14 +47,7 @@ namespace Game
             }
         }
 
-        override public void render()
-        {
-            GraphicCore core = GraphicCore.getInstance();
-            //SharpDX.Matrix dpi = SharpDX.Matrix.Scaling(Camera.width / 1920.0f, Camera.height / 1200.0f, 1);
-            //tf.text = dpi + " " + Camera.width + " " + System.Windows.Forms.SystemInformation.PrimaryMonitorSize.Height;
-        }
-
-        override public void release()
+        public override void release()
         {
             keeper.clearAll();
             ui.clear();

@@ -5,13 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.Xml;
+using Game.GCore;
 
 namespace Game
 {
     public class Resource
     {
         private static Dictionary<String, XmlDocument> xmls = new Dictionary<string, XmlDocument>();
-        private static Dictionary<String, Engine.Bitmap> btms = new Dictionary<string, Engine.Bitmap>();
+        private static Dictionary<String, Bitmap> btms = new Dictionary<string, Bitmap>();
         private Resource()
         {
         }
@@ -31,12 +32,12 @@ namespace Game
                 return xmls[path];
             }
         }
-        public static Engine.Bitmap getBitmap(String path)
+        public static Bitmap getBitmap(String path)
         {
             if (!btms.ContainsKey(path))
             {
                 Console.WriteLine("Load bitmap resource " + path);
-                Engine.Bitmap b = new Engine.Bitmap();
+                Bitmap b = new Bitmap();
                 b.loadFromFile(path);
                 btms[path] = b;
                 return b;

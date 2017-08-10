@@ -1,20 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Game.GCore;
 
-using Game.GCore;
-
-namespace Game
+namespace Game.States
 {
     public class GameOptionsState : State
     {
         UITemplate ui;
-        public GameOptionsState()
-        {
-            
-        }
-        override public void init()
+
+        public override void init()
         {
             //Console.WriteLine("New Game");
             ui = new UITemplate(Resource.getXml("UI\\Templates\\options_menu.xml"));
@@ -22,27 +14,31 @@ namespace Game
             ui.layout.x = 0;
             Game.interfaceView.addChild(ui.layout);
         }
-        override public void render()
-        {
 
+        public override void render()
+        {
         }
-        override public void release()
+
+        public override void release()
         {
             Game.interfaceView.removeChild(ui.layout);
             ui.clear();
         }
+
         private void onClick(Event e)
         {
             switch (e.target.id)
             {
                 case "start":
-                    {
-                        dispatchEvent(new StateEvent(this, StateEvent.CHANGE_STATE, "generate"));
-                    } break;
+                {
+                    dispatchEvent(new StateEvent(this, StateEvent.CHANGE_STATE, "generate"));
+                }
+                    break;
                 case "back":
-                    {
-                        dispatchEvent(new StateEvent(this, StateEvent.CHANGE_STATE, "menu"));
-                    } break;
+                {
+                    dispatchEvent(new StateEvent(this, StateEvent.CHANGE_STATE, "menu"));
+                }
+                    break;
             }
         }
     }

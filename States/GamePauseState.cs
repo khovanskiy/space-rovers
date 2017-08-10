@@ -1,20 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Game.GCore;
 
-using Game.GCore;
-
-namespace Game
+namespace Game.States
 {
     public class GamePauseState : State
     {
         UITemplate ui;
-        public GamePauseState()
-        {
-            
-        }
+
         override public void init()
         {
             ui = new UITemplate(Resource.getXml("UI\\Templates\\pause_menu.xml"));

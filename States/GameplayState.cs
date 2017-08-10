@@ -1,11 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using Game.GCore;
-using Astronomy;
-using RegistrySystem;
 using System.Collections;
+using System.Collections.Generic;
+using Astronomy;
+using Game.Astronomy;
+using Game.Astronomy.Objects;
+using Game.GCore;
+using RegistrySystem;
 
-namespace Game
+namespace Game.States
 {
     public class GameplayState : State
     {

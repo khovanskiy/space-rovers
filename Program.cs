@@ -1,17 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
 using SharpDX;
 using SharpDX.Direct2D1;
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
-using SharpDX.RawInput;
 using SharpDX.DXGI;
 using SharpDX.Windows;
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
-using SharpDX.Multimedia;
-using System.Threading;
-
 using Game.GCore;
 
 namespace Game
@@ -26,11 +17,12 @@ namespace Game
         {
             Game game = new Game();
         }
+
         private static void Main()
         {
             core = GraphicCore.getInstance();
             run();
-            var brush=new SolidColorBrush(core.render2d,Color.Gold);
+            var brush = new SolidColorBrush(core.render2d, Color.Gold);
             RenderLoop.Run(core.form, () =>
             {
                 if (core.running)

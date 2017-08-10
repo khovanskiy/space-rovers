@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using RegistrySystem;
 
 namespace Game
 {
     public class GenerateWorldState : State
     {
         UITemplate ui;
-        public GenerateWorldState()
-        {
-            
-        }
-        override public void init()
+
+        public override void init()
         {
             ui = new UITemplate(GCore.Resource.getXml("UI\\Templates\\loading.xml"));
             keeper.add(Game.interfaceView, ui.layout);
@@ -21,14 +15,16 @@ namespace Game
             wf.generate();
 
             Player player = new Player();
-            RegistrySystem.Registry.getInstance().addElement(player, "player");
+            Registry.getInstance().addElement(player, "player");
 
             dispatchEvent(new StateEvent(this, StateEvent.CHANGE_STATE, "gameplay"));
         }
-        override public void render()
+
+        public override void render()
         {
         }
-        override public void release()
+
+        public override void release()
         {
             keeper.clearAll();
             ui.clear();

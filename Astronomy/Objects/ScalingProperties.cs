@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using Engine.MyParser;
 
-
-namespace Engine.Astronomy.Objects
+namespace Game.Astronomy.Objects
 {
     [Serializable()]
     public class ScalingProperties

@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using Game.Astronomy.Objects;
 using Game.GCore;
 
 namespace Game
 {
     public class PlanetView : Bitmap
     {
-        private Astronomy.SpaceObject _model;
-        public PlanetView(Astronomy.SpaceObject model)
+        private SpaceObject _model;
+        public PlanetView(SpaceObject model)
         {
             _model = model;
             model.addEventListener(Event.CHANGE, onNextTick);

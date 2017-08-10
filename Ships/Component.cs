@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Game.Ships
+﻿namespace Game.Ships
 {
-    public abstract class Component
+    public abstract class Component : RegistrySystem.RegistryObject
     {
-        int level;
-        int quality;
+        public int level = 0;
+        public int type = 0;
+        public int quality = 0;
+        public float score = 0f;
+        public abstract Component likeIt();
     }
 }

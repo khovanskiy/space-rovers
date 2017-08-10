@@ -1,22 +1,76 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using Engine.MyParser;
 
-namespace Engine.Astronomy.Objects
+namespace Game.Astronomy.Objects
 {
     [Serializable()]
     public class RelativeMovement
     {
-        public float ell_angle, eccentr, ang_v, orb_angle, precession, spin_speed, spin_angle, hor_axis;
-        public bool ell_cw, spin_cw, prec_cw;
+        /// <summary>
+        /// Эталонный радиус
+        /// </summary>
+        public float radius;
 
-        public RelativeMovement(float ell_angle = 0, float eccentr = 0, float ang_v = 0, float orb_angle = 0, float precession = 0, 
-            float spin_speed = 0, float spin_angle = 0, float hor_axis = 0, bool ell_cw = false, bool spin_cw = false, bool prec_cw = false)
+        /// <summary>
+        /// Локальный угол поворота в радианах
+        /// </summary>
+        public float ell_angle;
+
+        /// <summary>
+        /// Эксцентриситет орбиты
+        /// </summary>
+        public float eccentr;
+
+        /// <summary>
+        /// Эталонная угловая скорость
+        /// </summary>
+        public float ang_v;
+
+        /// <summary>
+        /// Угол поворота самой орбиты к осям координат в радианах
+        /// </summary>
+        public float orb_angle;
+
+        /// <summary>
+        /// Прецессия орбиты
+        /// </summary>
+        public float precession;
+
+        /// <summary>
+        /// Скорость вращения вокруг оси в радиан/dt
+        /// </summary>
+        public float spin_speed;
+
+        /// <summary>
+        /// Текущий угол поворота вокруг оси
+        /// </summary>
+        public float spin_angle;
+
+        /// <summary>
+        /// Угол наклона оси вращения к орбите
+        /// </summary>
+        public float hor_axis;
+
+        /// <summary>
+        /// Движение по орбите по часовой стрелке
+        /// </summary>
+        public bool ell_cw;
+
+        /// <summary>
+        /// Движение вокруг оси по часовой стрелке
+        /// </summary>
+        public bool spin_cw;
+
+        /// <summary>
+        /// Прецессия орбиты поворачивает её по часовой стрелке
+        /// </summary>
+        public bool prec_cw;
+
+        public RelativeMovement(float radius = 0, float ell_angle = 0, float eccentr = 0, float ang_v = 0,
+            float orb_angle = 0, float precession = 0,
+            float spin_speed = 0, float spin_angle = 0, float hor_axis = 0, bool ell_cw = false, bool spin_cw = false,
+            bool prec_cw = false)
         {
+            this.radius = radius;
             this.ell_angle = ell_angle;
             this.eccentr = eccentr;
             this.ang_v = ang_v;

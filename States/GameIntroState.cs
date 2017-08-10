@@ -1,8 +1,8 @@
-﻿namespace Game
+﻿namespace Game.States
 {
     public class GameIntroState : State
     {
-        override public void init()
+        public override void init()
         {
             dispatchEvent(new StateEvent(this, StateEvent.CHANGE_STATE, "menu"));
         }

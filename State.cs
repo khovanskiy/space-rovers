@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections;
+﻿using System.Collections;
 
 namespace Game
 {
@@ -12,14 +7,17 @@ namespace Game
         protected GCore.ListenersManager keeper = new GCore.ListenersManager();
         private bool _isRendering = true;
         public Hashtable args;
+
         protected void setRendering(bool t)
         {
             _isRendering = t;
         }
+
         public bool getRendering()
         {
             return _isRendering;
         }
+
         /// <summary>
         /// Метод, вызывающийся при добавлении в очередь состояний.
         /// </summary>
@@ -30,6 +28,7 @@ namespace Game
         virtual public void init()
         {
         }
+
         /*public void finalFocus()
         {
             focus();
@@ -38,6 +37,7 @@ namespace Game
         {
             keeper.resumeListeners();
         }
+
         /// <summary>
         /// Метод, вызывающийся при каждой перерисовке экрана
         /// </summary>
@@ -48,6 +48,7 @@ namespace Game
         virtual public void render()
         {
         }
+
         /*public void _defocus()
         {
             keeper.clearListeners();
@@ -57,6 +58,7 @@ namespace Game
         {
             keeper.pauseListeners();
         }
+
         /// <summary>
         /// Метод, вызывающийся при удалении объекта из очереди состояний
         /// </summary>

@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Game
+﻿namespace Game.States
 {
     public class GameExitState : State
     {
-        public GameExitState()
-        {
-        }
         public override void init()
         {
             Game.core.form.Close();

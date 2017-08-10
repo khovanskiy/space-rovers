@@ -5,6 +5,8 @@ using System.Text;
 
 using System.Xml;
 using Astronomy;
+using Game.Astronomy;
+using Game.Astronomy.Objects;
 
 namespace Game
 {
